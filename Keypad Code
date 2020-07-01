@@ -1,0 +1,71 @@
+import PySimpleGUI as g
+
+g.theme('DarkAmber')	# Add a touch of color
+
+# create the 2 Elements we want to control outside the form
+out_elem = g.Text('', size=(30,1))
+in_elem = g.Text('', size=(10,1),enable_events=True)
+
+layout = [[g.Text('Default PIN is 0000'), g.Button('Reset', size=(10,1))],
+          [in_elem, g.Checkbox('Show PIN', default=True, key='showin')],
+          [g.Button('1', size=(4,2)), g.Button('2', size=(4,2)), g.Button('3', size=(4,2))],
+          [g.Button('4', size=(4,2)), g.Button('5', size=(4,2)), g.Button('6', size=(4,2))],
+          [g.Button('7', size=(4,2)), g.Button('8', size=(4,2)), g.Button('9', size=(4,2))],
+          [g.Button('Clear', size=(6,2)), g.Button('0', size=(4,2)), g.Button('Submit', size=(6,2))],
+          [out_elem]]
+
+form = g.FlexForm('Keypad', auto_size_buttons=False)
+form.Layout(layout)
+
+stars = ''
+pin = '0000'
+
+keys_entered = ''
+while True:
+    button, values = form.Read()                # read the form
+    
+    if button is None:                          # if the X clicked, exit without creating errors
+        break
+    
+    if button == 'Clear':                       # clear the input and output
+        in_elem.Update('')
+        out_elem.Update('')
+        keys_entered = ''
+        stars = ''
+    
+    if button == 'Reset':                       # reset the pin to your inputted value
+        if keys_entered == '':                  # make sure something has actually been entered
+            out_elem.Update('You must enter a new PIN')
+        elif keys_entered != '':
+            pin = keys_entered
+            in_elem.Update('')
+            out_elem.Update('')
+            keys_entered = ''
+            stars = ''
+    
+    if values['showin']==True:                      # if show pin is checked
+        if button in '1234567890':
+            keys_entered += button                  # add the new digit
+            in_elem.Update(keys_entered)            # show the digits entered
+            out_elem.Update('')
+    elif values['showin']==False:                   # if show pin is unchecked
+        if button in '1234567890':
+            keys_entered += button                  # add the new digit
+            stars += '*'                            # make sure we have the right amount of stars
+            in_elem.Update(stars)                   # show the stars
+            out_elem.Update('')
+        
+    if button == 'Submit':                    
+        if keys_entered == pin:                     # if what's been entered matches the PIN, display 'correct'
+            out_elem.Update('CORRECT')
+            keys_entered = ''
+            stars = ''
+            in_elem.Update('')                      # and clear the input field
+        else:
+            out_elem.Update('INCORRECT')
+            in_elem.Update('')
+            keys_entered = ''
+            stars = ''
+                     
+
+
